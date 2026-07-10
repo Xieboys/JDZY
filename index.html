@@ -1,0 +1,673 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>河南机电职业学院 - 新生专网</title>
+    <style>
+        /* ================== 全局重置与变量 ================== */
+        :root {
+            --primary-color: #0056b3;
+            --primary-gradient: linear-gradient(135deg, #0056b3, #007bff);
+            --bg-color: #f2f5f8;
+            --text-main: #333333;
+            --text-light: #666666;
+            --white: #ffffff;
+            --danger: #e63946;
+            --section-bg: #ffffff;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: var(--bg-color); color: var(--text-main); line-height: 1.6; }
+
+        /* ================== 全局水印样式 ================== */
+        .watermark-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none; /* 让鼠标点击穿透水印 */
+            z-index: 9999;
+            overflow: hidden;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            align-content: space-around;
+        }
+        
+        .watermark-text {
+            color: rgba(150, 150, 150, 0.12);
+            font-size: 16px;
+            font-weight: bold;
+            transform: rotate(-30deg);
+            user-select: none;
+            white-space: nowrap;
+            padding: 30px 40px;
+            letter-spacing: 1px;
+        }
+
+        /* ================== 核心容器 ================== */
+        #app-container { max-width: 500px; margin: 0 auto; background-color: var(--bg-color); min-height: 100vh; position: relative; overflow-x: hidden; }
+        .page { display: none; padding-bottom: 40px; animation: fadeIn 0.3s ease; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ================== 顶部毛玻璃吸顶横幅 (极致美化版) ================== */
+        .top-bar {
+            background: rgba(255, 255, 255, 0.85); /* 半透明白底 */
+            backdrop-filter: saturate(180%) blur(16px); /* 苹果iOS级毛玻璃效果 */
+            -webkit-backdrop-filter: saturate(180%) blur(16px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); /* 极柔和的底层阴影 */
+        }
+        
+        .top-bar-left { display: flex; align-items: center; gap: 12px; }
+        
+        /* 动态呼吸灯图标 */
+        .pulse-icon {
+            font-size: 18px;
+            background: linear-gradient(135deg, #e8f0fe, #d0e0fd);
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: pulseAlert 2s infinite; /* 呼吸动效，拒绝单调 */
+            box-shadow: 0 2px 8px rgba(0, 86, 179, 0.15);
+        }
+        
+        @keyframes pulseAlert {
+            0% { box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.4); transform: scale(1); }
+            70% { box-shadow: 0 0 0 8px rgba(0, 123, 255, 0); transform: scale(1.05); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 123, 255, 0); transform: scale(1); }
+        }
+        
+        /* 顶部文字精细化排版 */
+        .top-text-box { display: flex; flex-direction: column; justify-content: center; }
+        .top-text-title { font-size: 14px; font-weight: 800; color: #222; letter-spacing: 0.5px; line-height: 1.2; margin-bottom: 3px;}
+        .top-text-subtitle { font-size: 11px; color: #666; display: flex; align-items: center; gap: 4px; line-height: 1;}
+        .wx-highlight { 
+            color: var(--primary-color); 
+            font-weight: 900; 
+            font-family: -apple-system, BlinkMacSystemFont, monospace;
+            background: #e8f0fe;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+        
+        /* 高级渐变复制按钮 */
+        .top-bar-right .copy-btn { 
+            background: linear-gradient(135deg, #ff9a44, #fc6076); /* 活力渐变色 */
+            color: #fff; 
+            border: none; 
+            padding: 8px 16px; 
+            border-radius: 20px; 
+            font-weight: bold; 
+            font-size: 12px; 
+            cursor: pointer; 
+            box-shadow: 0 4px 12px rgba(252, 96, 118, 0.3); /* 按钮微发光 */
+            transition: all 0.2s ease; 
+            position: relative; 
+            z-index: 101;
+        }
+        .top-bar-right .copy-btn:active { 
+            transform: scale(0.92); 
+            box-shadow: 0 2px 6px rgba(252, 96, 118, 0.4); 
+        }
+
+        /* ================== 首页美化 ================== */
+        .hero-section { background: var(--white); padding: 30px 20px; text-align: center; border-radius: 0 0 24px 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .school-logo { font-size: 48px; margin-bottom: 10px; display: inline-block; }
+        .school-title { font-size: 24px; font-weight: 800; color: var(--primary-color); letter-spacing: 1px; margin-bottom: 5px; }
+        .school-desc { font-size: 13px; color: var(--text-light); background: #e8f0fe; display: inline-block; padding: 4px 12px; border-radius: 20px; }
+        .menu-container { padding: 0 16px; display: flex; flex-direction: column; gap: 12px; }
+        .menu-item { background: var(--white); border-radius: 16px; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.03); cursor: pointer; transition: transform 0.2s; position: relative; z-index: 10;}
+        .menu-item:active { transform: scale(0.98); background-color: #fafafa; }
+        .menu-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 22px; margin-right: 15px; }
+        .menu-text { flex: 1; }
+        .menu-text h3 { font-size: 16px; color: var(--text-main); margin-bottom: 2px; }
+        .menu-text p { font-size: 12px; color: #999; }
+        .menu-arrow { color: #ccc; font-size: 20px; }
+        .icon-guide { background: #e8f4fd; color: #1890ff; }
+        .icon-checklist { background: #fef0ef; color: #f5222d; }
+        .icon-map { background: #f6ffed; color: #52c41a; }
+
+        /* ================== 子页面头部与右上角目录按钮 ================== */
+        .nav-header { background: var(--white); padding: 15px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 58px; z-index: 90; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .nav-back { color: var(--primary-color); font-size: 16px; font-weight: 600; display: flex; align-items: center; cursor: pointer; width: 60px; position: relative; z-index: 91;}
+        .nav-back::before { content: "‹"; font-size: 26px; margin-right: 4px; position: relative; top: -1px; }
+        .nav-title { flex: 1; text-align: center; font-size: 17px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .nav-menu-btn { color: var(--primary-color); font-size: 14px; font-weight: bold; cursor: pointer; width: 60px; text-align: right; background: #e8f0fe; padding: 4px 8px; border-radius: 12px; position: relative; z-index: 91;}
+        .nav-menu-btn:active { background: #d0e0fd; }
+
+        /* ================== 攻略长文排版美化 ================== */
+        .content-box { padding: 16px; }
+        .guide-section { background: var(--section-bg); border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); scroll-margin-top: 130px; }
+        .guide-section h3 { font-size: 18px; color: var(--primary-color); border-bottom: 2px solid #e8f0fe; padding-bottom: 10px; margin-bottom: 15px; display: flex; align-items: center; }
+        .guide-section h3::before { content: ''; display: inline-block; width: 4px; height: 18px; background: var(--primary-gradient); margin-right: 8px; border-radius: 2px; }
+        .guide-section h4 { font-size: 15px; color: #111; margin: 16px 0 8px 0; font-weight: bold; }
+        .guide-section p { font-size: 14px; color: #444; margin-bottom: 10px; text-align: justify; }
+        .guide-section ul, .guide-section ol { padding-left: 20px; font-size: 14px; color: #444; margin-bottom: 12px; }
+        .guide-section li { margin-bottom: 6px; }
+        .guide-section .highlight-text { background-color: #fff3e0; color: #d84315; padding: 0 4px; border-radius: 4px; font-weight: bold; }
+        
+        /* 攻略通用表格美化 */
+        .guide-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; border-radius: 8px; overflow: hidden; box-shadow: 0 0 0 1px #eee; }
+        .guide-table th { background-color: #f0f7ff; color: var(--primary-color); padding: 10px; text-align: left; font-weight: bold; }
+        .guide-table td { padding: 10px; border-top: 1px solid #eee; border-bottom: 1px solid #eee; color: #333; }
+        .guide-table tr:nth-child(even) { background-color: #fafafa; }
+
+        /* 特殊引言块 */
+        .quote-block { border-left: 4px solid var(--primary-color); background: #f8f9fa; padding: 12px 15px; margin: 12px 0; font-size: 13px; color: #666; border-radius: 0 8px 8px 0; }
+
+        /* 清单页原有网格样式 */
+        .table-card { background: var(--white); border-radius: 12px; overflow: hidden; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .table-header { padding: 12px 16px; font-weight: bold; font-size: 15px; color: var(--white); display: flex; align-items: center; gap: 8px; }
+        .th-red { background: linear-gradient(90deg, #e63946, #f28482); }
+        .th-blue { background: linear-gradient(90deg, #1d3557, #457b9d); }
+        .th-green { background: linear-gradient(90deg, #2a9d8f, #48bcae); }
+        .th-orange { background: linear-gradient(90deg, #e76f51, #f4a261); }
+        .items-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: #f0f0f0; }
+        .grid-item { background: var(--white); padding: 12px 4px; text-align: center; font-size: 13px; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 54px;}
+        .sub-tag { font-size: 10px; color: #888; margin-top: 2px; }
+        .sub-danger { color: var(--danger); font-weight: bold; }
+
+        /* 底部便签框 */
+        .notice-box { background: #fffbe6; border: 1px solid #ffe58f; border-radius: 12px; padding: 16px; margin-top: 20px; box-shadow: 0 2px 8px rgba(250, 173, 20, 0.1); scroll-margin-top: 130px;}
+        .notice-box h4 { color: #d46b08; display: flex; align-items: center; gap: 6px; margin-bottom: 12px; font-size: 16px; font-weight: bold;}
+        .notice-list { padding-left: 20px; font-size: 13px; color: #5c5c5c; line-height: 1.6; }
+        .notice-list li { margin-bottom: 10px; padding-left: 4px; }
+        .highlight { color: var(--danger); font-weight: 800; font-size: 14px; }
+
+        /* ================== 弹窗 (Modal) ================== */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(3px); display: flex; justify-content: center; align-items: center; z-index: 10000; padding: 20px; opacity: 1; transition: opacity 0.3s; }
+        .modal-overlay.hidden { opacity: 0; pointer-events: none; }
+        .modal-card { background: var(--white); width: 100%; max-width: 320px; border-radius: 20px; padding: 24px; position: relative; text-align: center; transform: scale(1); transition: transform 0.3s; }
+        .modal-overlay.hidden .modal-card { transform: scale(0.9); }
+        .modal-title { font-size: 20px; font-weight: 800; margin-bottom: 8px; color: var(--primary-color); }
+        .modal-badge { background: #e8f0fe; color: var(--primary-color); font-size: 12px; padding: 4px 10px; border-radius: 20px; display: inline-block; margin-bottom: 16px; font-weight: bold;}
+        .modal-list { text-align: left; list-style: none; font-size: 14px; color: #444; margin-bottom: 20px; }
+        .modal-list li { margin-bottom: 10px; display: flex; gap: 8px; }
+        .modal-copy-btn { background: var(--primary-gradient); color: var(--white); border: none; width: 100%; padding: 12px; border-radius: 12px; font-size: 15px; font-weight: bold; cursor: pointer; }
+        .modal-close { position: absolute; bottom: -60px; left: 50%; transform: translateX(-50%); width: 40px; height: 40px; border-radius: 50%; border: 2px solid #fff; color: #fff; font-size: 20px; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+
+        /* ================== 右上角目录抽屉 (Drawer) ================== */
+        #directoryDrawer { align-items: flex-end; padding: 0; z-index: 10001;}
+        .drawer-content { background: #fff; width: 100%; max-width: 500px; max-height: 80vh; border-radius: 24px 24px 0 0; padding: 20px 20px 40px 20px; overflow-y: auto; transform: translateY(0); transition: transform 0.3s cubic-bezier(0.1, 0.8, 0.2, 1); }
+        #directoryDrawer.hidden .drawer-content { transform: translateY(100%); }
+        .drawer-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 15px; position: sticky; top: -20px; background: #fff; z-index: 10; }
+        .drawer-header h3 { font-size: 18px; color: #333; margin: 0; }
+        .drawer-close { font-size: 24px; color: #999; cursor: pointer; }
+        .dir-list { list-style: none; padding: 0; margin: 0; }
+        .dir-item { padding: 12px 10px; border-bottom: 1px dashed #f0f0f0; font-size: 15px; color: #444; display: flex; align-items: center; cursor: pointer; }
+        .dir-item:active { background-color: #f9f9f9; }
+        .dir-item::before { content: '📍'; margin-right: 10px; font-size: 14px; }
+        
+        .toast { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); color: var(--white); padding: 12px 24px; border-radius: 8px; font-size: 14px; z-index: 10002; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .toast.show { opacity: 1; }
+    </style>
+</head>
+<body>
+
+<!-- 动态生成水印的容器 -->
+<div class="watermark-container" id="watermarkBox"></div>
+
+<div id="app-container">
+    
+    <!-- 1. 全新美化版毛玻璃顶部横幅 -->
+    <div class="top-bar">
+        <div class="top-bar-left">
+            <div class="pulse-icon">📢</div>
+            <div class="top-text-box">
+                <span class="top-text-title">小博学长在线答疑</span>
+                <span class="top-text-subtitle">
+                    官方微信: <span class="wx-highlight">HNJDXB</span>
+                </span>
+            </div>
+        </div>
+        <div class="top-bar-right">
+            <button class="copy-btn" onclick="handleCopy('HNJDXB')">一键复制</button>
+        </div>
+    </div>
+
+    <!-- 2. 全局提示框 -->
+    <div id="toastMessage" class="toast">复制成功！</div>
+
+    <!-- 3. 欢迎弹窗 -->
+    <div id="welcomeModal" class="modal-overlay">
+        <div class="modal-card">
+            <h3 class="modal-title">新生必加小博学长</h3>
+            <div class="modal-badge">迎新官方推荐</div>
+            <ul class="modal-list">
+                <li>🎃 <span>新生指南最新公告发布</span></li>
+                <li>👻 <span>24级在校学长一对一解答</span></li>
+                <li>🤖 <span>拉新生、建本专业新生群</span></li>
+                <li>🌋 <span>校园答疑│提前了解大学生活</span></li>
+                <li>🎅 <span>军训攻略、避坑踩雷全指南</span></li>
+            </ul>
+            <button class="modal-copy-btn" onclick="handleCopy('HNJDXB')">复制微信号：HNJDXB</button>
+            <div class="modal-close" onclick="closeModal()">✕</div>
+        </div>
+    </div>
+
+    <!-- 4. 目录抽屉 (点击指南页右上角触发) -->
+    <div id="directoryDrawer" class="modal-overlay hidden" onclick="closeDirectory(event)">
+        <div class="drawer-content" onclick="event.stopPropagation()">
+            <div class="drawer-header">
+                <h3>快速定位目录</h3>
+                <div class="drawer-close" onclick="closeDirectory()">✕</div>
+            </div>
+            <ul class="dir-list">
+                <li class="dir-item" onclick="scrollToSec('sec-1')">第一部分：报到入学</li>
+                <li class="dir-item" onclick="scrollToSec('sec-2')">第二部分：交通与地理位置</li>
+                <li class="dir-item" onclick="scrollToSec('sec-3')">第三部分：住宿攻略</li>
+                <li class="dir-item" onclick="scrollToSec('sec-4')">第四部分：食堂与美食攻略</li>
+                <li class="dir-item" onclick="scrollToSec('sec-5')">第五部分：生活费参考</li>
+                <li class="dir-item" onclick="scrollToSec('sec-6')">第六部分：日常生活设施使用指南</li>
+                <li class="dir-item" onclick="scrollToSec('sec-7')">第七部分：校园纪律与管理</li>
+                <li class="dir-item" onclick="scrollToSec('sec-8')">第八部分：学习成长篇</li>
+                <li class="dir-item" onclick="scrollToSec('sec-9')">第九部分：宿舍生活篇</li>
+                <li class="dir-item" onclick="scrollToSec('sec-10')">第十部分：恋爱爱情篇</li>
+                <li class="dir-item" onclick="scrollToSec('sec-11')">第十一部分："内卷"篇</li>
+                <li class="dir-item" onclick="scrollToSec('sec-12')">第十二部分：思维转变篇</li>
+                <li class="dir-item" onclick="scrollToSec('sec-13')" style="color:var(--danger);font-weight:bold;">综合提醒速览</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- ================== 页面区域 ================== -->
+
+    <!-- 【页面 0】首页 -->
+    <div id="page-home" class="page active">
+        <div class="hero-section">
+            <div class="school-logo">🎓</div>
+            <h1 class="school-title">河南机电职业学院</h1>
+            <div class="school-desc">小博学长欢迎2026新同学</div>
+        </div>
+        <div class="menu-container">
+            <div class="menu-item" onclick="navigateTo('page-guide')">
+                <div class="menu-icon icon-guide">📖</div>
+                <div class="menu-text"><h3>新生入学全攻略</h3><p>详细完整版！报到/住宿/食堂</p></div>
+                <div class="menu-arrow">›</div>
+            </div>
+            <div class="menu-item" onclick="navigateTo('page-checklist')">
+                <div class="menu-icon icon-checklist">🎒</div>
+                <div class="menu-text"><h3>开学必备清单</h3><p>证件 / 生活 / 住宿物品</p></div>
+                <div class="menu-arrow">›</div>
+            </div>
+            <div class="menu-item" onclick="navigateTo('page-map')">
+                <div class="menu-icon icon-map">🗺️</div>
+                <div class="menu-text"><h3>校园地图</h3><p>宿舍 / 餐厅 / 教学楼分布</p></div>
+                <div class="menu-arrow">›</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 【页面 1】新生入学指南 -->
+    <div id="page-guide" class="page">
+        <div class="nav-header">
+            <div class="nav-back" onclick="navigateTo('page-home')">返回</div>
+            <div class="nav-title">入学全攻略</div>
+            <div class="nav-menu-btn" onclick="openDirectory()">目录 ☰</div>
+        </div>
+        
+        <div class="content-box">
+            
+            <!-- 第一部分 -->
+            <div class="guide-section" id="sec-1">
+                <h3>第一部分：报到入学</h3>
+                <h4>1. 报到时间</h4>
+                <ul>
+                    <li><strong>线上报到：</strong>8月30日－9月10日（通过"我i机电"小程序完成报到前准备）</li>
+                    <li><strong>线下报到：</strong>9月6日－9月8日（具体时间地点以各学院通知为准）</li>
+                </ul>
+                <h4>2. 必备证件材料清单</h4>
+                <table class="guide-table">
+                    <thead><tr><th width="35%">材料</th><th>备注</th></tr></thead>
+                    <tbody>
+                        <tr><td>录取通知书</td><td>原件</td></tr>
+                        <tr><td>考生准考证</td><td>原件</td></tr>
+                        <tr><td>身份证</td><td>原件及复印件</td></tr>
+                        <tr><td>证件照</td><td>一寸和两寸免冠照片，建议备红白蓝底电子版</td></tr>
+                        <tr><td>学籍档案</td><td>个人自带档案的，<span class="highlight-text">切勿拆封</span>，报到后交至学院</td></tr>
+                        <tr><td>团员档案</td><td>团员证、入团志愿书及其他团关系转接材料</td></tr>
+                        <tr><td>绿色通道材料</td><td>申请绿色通道的同学需准备</td></tr>
+                    </tbody>
+                </table>
+                <h4>3. 报到流程</h4>
+                <ol>
+                    <li><strong>安全到校：</strong>按照推荐路线到校，注意人财物安全。</li>
+                    <li><strong>报到登记：</strong>跟随志愿者到所在学院迎新报到处，在老师和学长学姐指引下完成登记。</li>
+                    <li><strong>办理住宿：</strong>志愿者和校园摆渡车会帮助到达公寓楼，在公寓管理老师处完成入住登记并领取宿舍钥匙。</li>
+                </ol>
+            </div>
+
+            <!-- 第二部分 -->
+            <div class="guide-section" id="sec-2">
+                <h3>第二部分：交通与地理位置</h3>
+                <h4>1. 学校地址</h4>
+                <p>河南省郑州市新郑市南大学城泰山路1号（泰山路与郑新快速路交叉口西200米路南）</p>
+                <h4>2. 来校方式</h4>
+                <ul>
+                    <li><strong>自驾：</strong>导航至"河南机电职业学院北大门"</li>
+                    <li><strong>地铁：</strong>乘坐地铁2号线（往新郑机场方向），在华南城西站下车，步行至泰山路，向西200米即到</li>
+                    <li><strong>火车/高铁：</strong>在郑州站或郑州东站下车后，换乘地铁2号线即可到达</li>
+                </ul>
+                <h4>3. 学校位置与出行</h4>
+                <p>河南机电职业学院位于郑州南大学城，形成了一个比较成熟的生活圈。大学城自带商业街、小吃街、快递驿站等配套，吃饭购物基本不用出大学城。</p>
+                <ul>
+                    <li>去市中心：公交+地铁单程约40–60分钟。</li>
+                    <li>实习优势：学校周边有产业园区，制造业和物流行业企业资源集中，找对口实习机会相对较多。</li>
+                </ul>
+                <h4>4. 校园环境</h4>
+                <p>校园面积不大，属于"小而精"类型，上课、吃饭、回宿舍都在步行范围内，节省通勤时间。图书馆座位较多，期末复习期间基本能保证使用。</p>
+            </div>
+
+            <!-- 第三部分 -->
+            <div class="guide-section" id="sec-3">
+                <h3>第三部分：住宿攻略</h3>
+                <h4>1. 公寓总体分布</h4>
+                <p>校内共有12栋学生公寓楼，整体分布在校园南侧：</p>
+                <ul>
+                    <li>1–3号楼：校园西南侧</li>
+                    <li>4–9号楼：南侧中部</li>
+                    <li>10–12号楼：校园东南侧</li>
+                </ul>
+                <h4>2. 宿舍设施设备</h4>
+                <p>每间配备：独立卫生间、生活阳台、洗漱池、无线及有线网络、床铺、桌椅、储物柜、空调。<strong>床铺尺寸：2.0m × 0.9m。</strong></p>
+                <h4>3. 新宿舍 vs 老宿舍（重要差异）</h4>
+                <table class="guide-table">
+                    <thead><tr><th width="25%">项目</th><th>老宿舍楼</th><th>北校区新宿舍(G8-G10)</th></tr></thead>
+                    <tbody>
+                        <tr><td>独立浴室</td><td>无淋浴喷头，去公共浴室</td><td>独立浴室，分时段供应热水</td></tr>
+                        <tr><td>洗澡方式</td><td>去自强餐厅二楼公共浴室</td><td>"智趣校园"扫码付费</td></tr>
+                        <tr><td>洗衣机</td><td>每层公共洗衣机(约4元/次)</td><td>无标配，需宿舍自行购买</td></tr>
+                        <tr><td>饮水机</td><td>每层直饮水机，扫码/刷脸</td><td>需自行购买或订桶装水</td></tr>
+                    </tbody>
+                </table>
+                <h4>4. 门禁与作息制度</h4>
+                <table class="guide-table">
+                    <tbody>
+                        <tr><td>开门时间</td><td>每天早上 6:00</td></tr>
+                        <tr><td>锁门时间</td><td>女生楼约21:40，男生楼约22:00</td></tr>
+                        <tr><td>熄灯时间</td><td>周日至周四 22:30；周五六不熄灯</td></tr>
+                        <tr><td>周末外出</td><td>周六日可自由出校，但不得在外过夜</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 第四部分 -->
+            <div class="guide-section" id="sec-4">
+                <h3>第四部分：食堂与美食攻略</h3>
+                <p>校园内共有三座学生餐厅，分布在不同区域：</p>
+                <table class="guide-table">
+                    <thead><tr><th>餐厅名称</th><th>特色</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>知行餐厅</strong><br><span style="font-size:12px;color:#666">"老餐厅"</span></td><td>菜品种类覆盖广，分量在三个餐厅里比较突出。</td></tr>
+                        <tr><td><strong>星座餐厅</strong><br><span style="font-size:12px;color:#666">"小餐厅"</span></td><td>规模相对小，排队速度快，适合人少时去。</td></tr>
+                        <tr><td><strong>自强餐厅</strong><br><span style="font-size:12px;color:#666">南门方向</span></td><td>一楼大盘鸡拌面等；二楼自选米饭性价比高。二楼也是公共浴室所在地。</td></tr>
+                    </tbody>
+                </table>
+                <p><strong>连锁品牌：</strong>幸运咖、瑞幸、蜜雪冰城、塔斯汀等在校内基本都有，不需要特意出校门。</p>
+            </div>
+
+            <!-- 第五部分 -->
+            <div class="guide-section" id="sec-5">
+                <h3>第五部分：生活费参考</h3>
+                <table class="guide-table">
+                    <thead><tr><th>消费水平</th><th>月生活费</th><th>说明</th></tr></thead>
+                    <tbody>
+                        <tr><td>紧凑型</td><td>1500–2000元</td><td>食堂为主，偶尔外卖，基本日用品</td></tr>
+                        <tr><td>宽裕型</td><td>2500元左右</td><td>社交活动较多、经常聚餐或买衣服</td></tr>
+                    </tbody>
+                </table>
+                <div class="quote-block">
+                    郑州消费水平在中等偏友好。建议第一个月先记账，摸清自己的实际花销。
+                </div>
+            </div>
+
+            <!-- 第六部分 -->
+            <div class="guide-section" id="sec-6">
+                <h3>第六部分：设施使用指南</h3>
+                <h4>1. 洗澡与洗衣</h4>
+                <p>老楼多去自强餐厅二楼公共浴室（约5元）；新宿舍自带浴室。老楼有公共洗衣机，新宿舍需自购。</p>
+                <h4>2. 用电须知（重点）</h4>
+                <p><span class="highlight-text">限电800W</span>，严禁大功率吹风机等，超额跳闸。电费通过"智趣校园"充值，建议和室友提前商量好空调电费分摊。</p>
+                <h4>3. 快递寄送</h4>
+                <p><strong>核心原则：大件提前寄，小件随身带。</strong>收件地址写全称。最稳妥做法是开学前5–7天发货，随身只带两三天的换洗衣物即可。</p>
+                <h4>4. 医务室与配套</h4>
+                <p>医务室位于4–5号公寓楼连廊，可刷医保拿药，旁边是心理健康教育中心。</p>
+            </div>
+
+            <!-- 第七部分 -->
+            <div class="guide-section" id="sec-7">
+                <h3>第七部分：校园纪律与管理</h3>
+                <ul>
+                    <li><strong>查寝：</strong>周一至周日晚上查人数，周日晚和周三下午检查卫生内务。</li>
+                    <li><strong>禁忌：</strong>禁止吸烟明火、不准养宠物、不能往窗外扔东西、男女生不互串宿舍。</li>
+                </ul>
+            </div>
+
+            <!-- 第八部分 -->
+            <div class="guide-section" id="sec-8">
+                <h3>第八部分：学习成长篇</h3>
+                <ul>
+                    <li><strong>别挂科！</strong>挂科影响评优、转专业、专升本，不要轻信"不挂科不完整"的毒鸡汤。</li>
+                    <li><strong>奖学金：</strong>国奖8000元，国家励志6000元。绩点和辅导员推荐很重要。</li>
+                    <li><strong>考证：</strong>大学英语四六级（趁大一早点过）、普通话等级考试、计算机二级。</li>
+                    <li><strong>图书馆：</strong>多去图书馆，是对抗堕落、提升自我最好的地方。</li>
+                    <li><strong>拒绝熬夜：</strong>熬夜伤身降效率。认真做事永远正确。</li>
+                </ul>
+            </div>
+
+            <!-- 第九部分 -->
+            <div class="guide-section" id="sec-9">
+                <h3>第九部分：宿舍生活篇</h3>
+                <p>宿舍只是睡觉的地方，学习去图书馆，运动去操场。互相包容生活习惯，东西尽量自备别总蹭别人的。适当享受孤独，一个人吃饭自习反而能深度思考。</p>
+            </div>
+
+            <!-- 第十、十一、十二部分 -->
+            <div class="guide-section" id="sec-10">
+                <h3>第十~十二部分：恋爱/内卷/思维</h3>
+                <ul>
+                    <li><strong>爱情：</strong>先提升自己，吸引对的人，不当渣男渣女，多磨合少冷战。</li>
+                    <li><strong>内卷：</strong>不要盲目跟风内耗，做职业规划，大胆试错，找到适合自己的路。</li>
+                    <li><strong>思维：</strong>从"补短"转向"扬长"，拓宽眼界，珍惜大学这最自由的四年时光。</li>
+                </ul>
+            </div>
+
+            <!-- 综合提醒速览 -->
+            <div class="notice-box" id="sec-13">
+                <h4>⚠️ 综合提醒速览 (核心干货)</h4>
+                <ul class="notice-list" style="padding-left:15px; margin-bottom:0;">
+                    <li>报到带齐证件，<strong>档案勿拆封</strong></li>
+                    <li>大件行李提前5–7天寄到学校</li>
+                    <li>床品尺寸 <strong>2.0 × 0.9m</strong></li>
+                    <li>限电800W，禁用大功率电器</li>
+                    <li>电费（含空调）提前与室友商议分摊</li>
+                    <li>门禁晚10点(男生)/9:40(女生)，周末不外宿</li>
+                    <li>查寝每日进行，卫生检查周日晚+周三下午</li>
+                    <li>奖学金看重绩点+辅导员推荐</li>
+                    <li>四六级趁大一赶紧过，不挂科不熬夜</li>
+                    <li>培养长板优势，适当孤独也能成长</li>
+                    <li class="highlight">认真做事，永远正确！</li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 【页面 2】开学必备清单 -->
+    <div id="page-checklist" class="page">
+        <div class="nav-header">
+            <div class="nav-back" onclick="navigateTo('page-home')">返回</div>
+            <div class="nav-title">开学必备清单</div>
+        </div>
+        <div class="content-box">
+             <!-- 表格 1：重要物品 -->
+             <div class="table-card">
+                <div class="table-header th-red">📁 重要物品 (切勿遗漏)</div>
+                <div class="items-grid">
+                    <div class="grid-item">身份证</div>
+                    <div class="grid-item">录取通知书</div>
+                    <div class="grid-item">准考证</div>
+                    <div class="grid-item">一/二寸照<span class="sub-tag">多备</span></div>
+                    <div class="grid-item">团(党)组织档案</div>
+                    <div class="grid-item">考生档案<span class="sub-tag sub-danger">禁拆</span></div>
+                    <div class="grid-item">现金若干</div>
+                    <div class="grid-item">银行卡<span class="sub-tag">中国银行</span></div>
+                    <div class="grid-item">身份证复印件<span class="sub-tag">5份</span></div>
+                </div>
+            </div>
+            <!-- 表格 2：生活用品 -->
+            <div class="table-card">
+                <div class="table-header th-blue">🧴 生活用品 (可到校购买)</div>
+                <div class="items-grid">
+                    <div class="grid-item">牙刷/牙膏/杯</div>
+                    <div class="grid-item">毛巾/浴巾</div>
+                    <div class="grid-item">洗面奶/护肤</div>
+                    <div class="grid-item">洗发水/护发素</div>
+                    <div class="grid-item">洗衣液/肥皂</div>
+                    <div class="grid-item">鞋刷/衣架</div>
+                    <div class="grid-item">防晒霜/伞</div>
+                    <div class="grid-item">拖鞋(棉+凉)</div>
+                    <div class="grid-item">排插/台灯</div>
+                    <div class="grid-item">水杯/暖壶</div>
+                    <div class="grid-item">纸巾/湿巾</div>
+                    <div class="grid-item">充电宝/U盘</div>
+                </div>
+            </div>
+             <!-- 表格 3：住宿用品 -->
+             <div class="table-card">
+                <div class="table-header th-green">🛏️ 住宿与个人物品</div>
+                <div class="items-grid">
+                    <div class="grid-item">被子/褥子</div>
+                    <div class="grid-item">床单/被罩</div>
+                    <div class="grid-item">枕头/枕头套</div>
+                    <div class="grid-item">毯子/床帐</div>
+                    <div class="grid-item">换洗衣物</div>
+                    <div class="grid-item">指甲剪套装</div>
+                </div>
+            </div>
+            <!-- 表格 4：药品 -->
+            <div class="table-card">
+                <div class="table-header th-orange">💊 常备药品</div>
+                <div class="items-grid">
+                    <div class="grid-item">温度计/创可贴</div>
+                    <div class="grid-item">感冒药/止痛药</div>
+                    <div class="grid-item">消炎药/碘伏</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 【页面 3】校园地图 -->
+    <div id="page-map" class="page">
+        <div class="nav-header">
+            <div class="nav-back" onclick="navigateTo('page-home')">返回</div>
+            <div class="nav-title">校园地图</div>
+        </div>
+        <div class="content-box">
+            
+            <div style="background: var(--white); padding: 16px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); text-align: center;">
+                <h3 style="color: var(--primary-color); margin-bottom: 15px; font-size: 18px; font-weight: bold;">河南机电职业学院手绘地图</h3>
+                
+                <!-- 【引用上传的图片】 -->
+                <img src="./public/map.png" alt="河南机电职业学院校园地图" style="width: 100%; height: auto; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: block;">
+                
+                <div style="background: #fffbe6; padding: 12px; border-radius: 8px; margin-top: 15px; text-align: left; border: 1px solid #ffe58f;">
+                    <p style="font-size: 13px; color: #d46b08; margin: 0; line-height: 1.6;">
+                        💡 <strong>学长提示：</strong><br>
+                        可以双指放大查看，或<strong>长按图片保存到手机相册中</strong>，方便报到当天寻找公寓楼、餐厅和教学楼哦！
+                    </p>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+</div>
+
+<!-- ================== JavaScript 交互控制 ================== -->
+<script>
+    // 动态生成全屏防盗水印
+    function generateWatermark() {
+        const container = document.getElementById('watermarkBox');
+        const text = "机电小博 微信：HNJDXB";
+        const count = 35; // 水印密集度
+        for (let i = 0; i < count; i++) {
+            const span = document.createElement('span');
+            span.className = 'watermark-text';
+            span.innerText = text;
+            container.appendChild(span);
+        }
+    }
+    // 页面加载时执行生成水印
+    window.onload = generateWatermark;
+
+    function navigateTo(targetPageId) {
+        document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+        document.getElementById(targetPageId).classList.add('active');
+        window.scrollTo(0, 0);
+    }
+
+    function closeModal() {
+        document.getElementById('welcomeModal').classList.add('hidden');
+    }
+
+    function handleCopy(text) {
+        const tempInput = document.createElement('input');
+        tempInput.value = text;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        tempInput.setSelectionRange(0, 99999);
+        try { document.execCommand('copy'); showToast(); } catch (err) { alert("请长按复制微信号：" + text); }
+        document.body.removeChild(tempInput);
+    }
+
+    function showToast() {
+        const toast = document.getElementById('toastMessage');
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    function openDirectory() {
+        document.getElementById('directoryDrawer').classList.remove('hidden');
+    }
+
+    function closeDirectory(e) {
+        if (!e || e.target.id === 'directoryDrawer' || e.target.className === 'drawer-close') {
+            document.getElementById('directoryDrawer').classList.add('hidden');
+        }
+    }
+
+    function scrollToSec(secId) {
+        document.getElementById('directoryDrawer').classList.add('hidden');
+        const target = document.getElementById(secId);
+        if (target) { 
+            // 计算由于悬浮头部产生的高度差进行偏移
+            const headerOffset = 110; 
+            const elementPosition = target.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: "smooth"
+            });
+        }
+    }
+</script>
+
+</body>
+</html>
+
+
+```
