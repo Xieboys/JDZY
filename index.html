@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -44,12 +43,12 @@
             animation: slideOut 0.3s ease-in forwards;
         }
         @keyframes slideIn {
-            from { transform: translateY(-20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from { transform: translateY(-20px) translateX(-50%); opacity: 0; }
+            to { transform: translateY(0) translateX(-50%); opacity: 1; }
         }
         @keyframes slideOut {
-            from { transform: translateY(0); opacity: 1; }
-            to { transform: translateY(-20px); opacity: 0; }
+            from { transform: translateY(0) translateX(-50%); opacity: 1; }
+            to { transform: translateY(-20px) translateX(-50%); opacity: 0; }
         }
         /* 优化排版细节 */
         .prose p { margin-bottom: 1rem; line-height: 1.75; }
@@ -62,7 +61,7 @@
     <div id="watermark"></div>
 
     <!-- 顶部联系横幅 (固定) -->
-    <div class="fixed top-0 left-0 right-0 bg-blue-600 text-white z-50 shadow-md">
+    <div class="fixed top-0 left-0 right-0 bg-blue-600 text-white z-40 shadow-md">
         <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center text-sm md:text-base">
             <div class="font-medium flex items-center">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
@@ -75,8 +74,103 @@
         </div>
     </div>
 
-    <!-- Toast 提示框容器 -->
-    <div id="toast-container" class="fixed top-16 left-1/2 transform -translate-x-1/2 z-50 flex flex-col items-center pointer-events-none"></div>
+    <!-- Toast 提示框容器 (提升z-index确保在弹窗之上) -->
+    <div id="toast-container" class="fixed top-16 left-1/2 z-[11000] flex flex-col items-center pointer-events-none"></div>
+
+    <!-- =============== 新增：首页欢迎弹窗 (Modal) =============== -->
+    <div id="welcomeModal" class="fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-black/60 px-5 opacity-0 pointer-events-none transition-opacity duration-300">
+        
+        <!-- 弹窗主体白框 -->
+        <div id="welcomeModalBody" class="bg-white rounded-[24px] w-full max-w-[340px] p-6 shadow-2xl transform scale-95 transition-transform duration-300">
+            
+            <!-- 头部设计 -->
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-black text-black mb-3">新生必加(震宇学长)</h2>
+                <div class="inline-block bg-blue-50 text-blue-600 px-4 py-1.5 rounded-full text-sm font-bold tracking-wide">
+                    新生指南最新公告
+                </div>
+            </div>
+
+            <!-- 主体内容 -->
+            <div class="text-gray-700 text-[15px] space-y-3.5 mb-6 leading-snug">
+                <p class="flex items-start"><span class="mr-2">🎃</span> <span>新生指南最新公告</span></p>
+                <p class="flex items-start"><span class="mr-2">👻</span> <span>25级在校学长</span></p>
+                <p class="flex items-start"><span class="mr-2">🤖</span> <span>拉新生、建新生群</span></p>
+                <p class="flex items-start"><span class="mr-2">🌋</span> <span>校园答疑│提前了解大学校园生活</span></p>
+                <p class="flex items-start"><span class="mr-2">🎅</span> <span>军训攻略、入学指南、校园地图、专业解答、避坑踩雷</span></p>
+            </div>
+            
+            <p class="text-gray-900 font-bold text-sm mb-6 text-center">
+                任何问题欢迎提问，学长学姐在线耐心答疑。
+            </p>
+
+            <!-- 复制功能区 -->
+            <div class="bg-gray-100 rounded-xl p-3.5 flex justify-between items-center">
+                <div class="flex flex-col">
+                    <span class="text-xs text-gray-500 mb-0.5">微信号</span>
+                    <span class="font-black text-gray-900 text-lg">zy8888kkk</span>
+                </div>
+                <button onclick="copyWechatFromModal()" class="bg-[#1e3a8a] hover:bg-blue-800 text-white px-4 py-2.5 rounded-lg font-bold text-sm shadow-md active:scale-95 transition-all">
+                    复制微信号
+                </button>
+            </div>
+        </div>
+
+        <!-- 关闭按钮 (位于白框正下方) -->
+        <button id="closeModalBtn" class="mt-8 w-11 h-11 rounded-full border-[2.5px] border-white text-white flex items-center justify-center hover:bg-white/20 active:scale-90 transition-all pointer-events-auto">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+    </div>
+    <!-- =============== 弹窗代码结束 =============== -->
+
+    <!-- =============== 新增：右上角悬浮目录及侧滑抽屉 =============== -->
+    <!-- 悬浮目录按钮 (固定在右上角) -->
+    <button id="tocToggleBtn" class="fixed top-[68px] right-3 z-[45] bg-white/95 text-blue-600 w-11 h-11 rounded-full shadow-lg border border-blue-100 flex flex-col items-center justify-center active:scale-90 transition-all backdrop-blur-sm">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        <span class="text-[9px] font-extrabold leading-none">目录</span>
+    </button>
+
+    <!-- 侧滑目录黑色遮罩 -->
+    <div id="tocOverlay" class="fixed inset-0 bg-black/50 z-[10400] opacity-0 pointer-events-none transition-opacity duration-300"></div>
+    
+    <!-- 侧滑目录面板主体 -->
+    <div id="tocDrawer" class="fixed inset-y-0 right-0 w-[280px] bg-white z-[10500] shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+        <!-- 面板头部 -->
+        <div class="px-5 py-4 border-b flex justify-between items-center bg-gray-50/80">
+            <h3 class="font-bold text-lg text-gray-800 flex items-center">
+                <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                内容导航
+            </h3>
+            <button id="tocCloseBtn" class="p-1.5 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-200 active:scale-90 transition-all">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <!-- 面板链接列表 -->
+        <div class="flex-1 overflow-y-auto p-5 pb-20 overscroll-contain">
+            <div class="mb-6">
+                <h4 class="text-sm font-bold text-blue-800 mb-3 bg-blue-50 inline-block px-2.5 py-1 rounded">篇章 I · 择校参考</h4>
+                <ul class="space-y-4 pl-1 text-[15px]">
+                    <li><a href="#ch-1-1" class="toc-link text-gray-700 hover:text-blue-600 font-medium block"><span class="text-gray-400 font-bold mr-2 text-sm">01</span>学校概览</a></li>
+                    <li><a href="#ch-1-2" class="toc-link text-gray-700 hover:text-blue-600 font-medium block"><span class="text-gray-400 font-bold mr-2 text-sm">02</span>专业选择</a></li>
+                    <li><a href="#ch-1-3" class="toc-link text-gray-700 hover:text-blue-600 font-medium block"><span class="text-gray-400 font-bold mr-2 text-sm">03</span>城市生活</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-sm font-bold text-blue-800 mb-3 bg-blue-50 inline-block px-2.5 py-1 rounded">篇章 II · 入学指南</h4>
+                <ul class="space-y-4 pl-1 text-[15px]">
+                    <li><a href="#ch-2-1" class="toc-link text-gray-700 hover:text-blue-600 font-medium block"><span class="text-gray-400 font-bold mr-2 text-sm">01</span>开学报到</a></li>
+                    <li><a href="#ch-2-2" class="toc-link text-gray-700 hover:text-blue-600 font-medium block"><span class="text-gray-400 font-bold mr-2 text-sm">02</span>宿舍入住</a></li>
+                    <li><a href="#ch-2-3" class="toc-link text-gray-700 hover:text-blue-600 font-medium block"><span class="text-gray-400 font-bold mr-2 text-sm">03</span>军训攻略</a></li>
+                    <li><a href="#ch-2-4" class="toc-link text-gray-700 hover:text-blue-600 font-medium block"><span class="text-gray-400 font-bold mr-2 text-sm">04</span>食堂美食</a></li>
+                    <li><a href="#ch-2-5" class="toc-link text-gray-700 hover:text-blue-600 font-medium block"><span class="text-gray-400 font-bold mr-2 text-sm">05</span>学业规划</a></li>
+                    <li><a href="#ch-2-6" class="toc-link text-gray-700 hover:text-blue-600 font-medium block"><span class="text-gray-400 font-bold mr-2 text-sm">06</span>社团社交</a></li>
+                    <li><a href="#ch-2-7" class="toc-link text-gray-700 hover:text-blue-600 font-medium block"><span class="text-gray-400 font-bold mr-2 text-sm">07</span>运动与就医</a></li>
+                    <li><a href="#ch-2-8" class="toc-link text-gray-700 hover:text-blue-600 font-medium block"><span class="text-gray-400 font-bold mr-2 text-sm">08</span>入学Checklist</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!-- =============== 侧滑抽屉代码结束 =============== -->
 
     <!-- 页面头部区域 -->
     <header class="pt-24 pb-10 bg-gradient-to-b from-blue-100 to-gray-50 px-4">
@@ -739,7 +833,7 @@
 
                 <h3 class="text-lg font-bold text-gray-800 mt-8 mb-3 border-l-4 border-blue-600 pl-3">“线场课堂”：不是在企业里打杂</h3>
                 <p>线场课堂是河南机电和普通高校差异最大的地方。学校主打“产教融合”模式，与宇通、比亚迪、博众精工等企业建立了深度合作。部分专业会在校内使用企业共建的实训教室上课，甚至直接安排学生去企业场地进行实践学习。</p>
-                <p>以智能工程学院为例，有同学反映大一下学期前后就会前往合作单位开展实践（具体时间和合作企业以当年学院安排为准）。去了之后并不是直接上流水线当操作工，而是利用企业的设备设施做实操训练和项目学习。汽车工程学院与郑州比亚迪的合作也类似，实训教室由双方共同打造，上课的形式就是“在学中做、做中学”。</p>
+                <p>以智能工程学院为例，有同学反映大一下学期前后就会前往合作单位开展实践（具体时间和合作企业以当年学院安排为准）。去了之后并不是直接上流水线当操作工，而是利用企业的设备设施做实操训练和项目学习。汽车工程学院与郑州比亚迪的合作也类似，实训教室由双方共同打造，上课的形式框架就是“在学中做、做中学”。</p>
                 <p>这种模式的优势很明显：技能上手快，学到的东西和未来岗位直接挂钩。但也有同学提到，普高过来的新生刚开始可能会不太适应——高中三年都在教室里听课，突然要动手拧螺丝、接线路，需要一个过渡期。另外学校的早晚自习安排得比较多，刚入学可能觉得节奏有点紧，但习惯之后反而能让人静下心来看书或复盘。</p>
 
                 <div class="bg-yellow-50 border-l-4 border-yellow-400 p-5 rounded-r mt-5 shadow-sm">
@@ -1070,6 +1164,84 @@
 
     <!-- 脚本：微信号复制功能与全局水印生成 -->
     <script>
+        // =============== 弹窗及相关 JS 逻辑 ===============
+        document.addEventListener('DOMContentLoaded', () => {
+            // 欢迎弹窗逻辑
+            const modal = document.getElementById('welcomeModal');
+            const modalBody = document.getElementById('welcomeModalBody');
+            const closeBtn = document.getElementById('closeModalBtn');
+
+            // 1. 延迟 0.5 秒自动弹出
+            setTimeout(() => {
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                modal.classList.add('opacity-100');
+                modalBody.classList.remove('scale-95');
+                modalBody.classList.add('scale-100');
+            }, 500);
+
+            // 2. 点击下方 X 号关闭弹窗
+            closeBtn.addEventListener('click', () => {
+                modal.classList.remove('opacity-100');
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                modalBody.classList.remove('scale-100');
+                modalBody.classList.add('scale-95');
+            });
+            
+            // =============== 右上角悬浮目录逻辑 ===============
+            const tocBtn = document.getElementById('tocToggleBtn');
+            const tocOverlay = document.getElementById('tocOverlay');
+            const tocDrawer = document.getElementById('tocDrawer');
+            const tocCloseBtn = document.getElementById('tocCloseBtn');
+            const tocLinks = document.querySelectorAll('.toc-link');
+
+            // 打开侧边栏
+            function openToc() {
+                tocOverlay.classList.remove('opacity-0', 'pointer-events-none');
+                tocOverlay.classList.add('opacity-100', 'pointer-events-auto');
+                tocDrawer.classList.remove('translate-x-full');
+                tocDrawer.classList.add('translate-x-0');
+            }
+
+            // 关闭侧边栏
+            function closeToc() {
+                tocOverlay.classList.remove('opacity-100', 'pointer-events-auto');
+                tocOverlay.classList.add('opacity-0', 'pointer-events-none');
+                tocDrawer.classList.remove('translate-x-0');
+                tocDrawer.classList.add('translate-x-full');
+            }
+
+            // 绑定目录开启与关闭事件
+            tocBtn.addEventListener('click', openToc);
+            tocCloseBtn.addEventListener('click', closeToc);
+            tocOverlay.addEventListener('click', closeToc);
+
+            // 遍历所有目录内链接，点击跳转后自动收起抽屉
+            tocLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    closeToc();
+                });
+            });
+        });
+
+        // 弹窗内部专用复制微信号功能
+        function copyWechatFromModal() {
+            const wechatId = "zy8888kkk";
+            const textArea = document.createElement("textarea");
+            textArea.value = wechatId;
+            document.body.appendChild(textArea);
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                showToast('复制成功');
+            } catch (err) {
+                showToast('复制失败，请手动复制 zy8888kkk');
+            }
+            
+            document.body.removeChild(textArea);
+        }
+
+        // =============== 页面原有逻辑 ===============
         // 生成基于 SVG 的固定背景水印 (防遮挡且清晰)
         document.addEventListener('DOMContentLoaded', () => {
             const svgText = `<svg xmlns="http://www.w3.org/2000/svg" width="350" height="250"><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" transform="rotate(-30, 175, 125)" fill="rgba(150,150,150,0.12)" font-size="22" font-family="sans-serif">震宇学长：zy8888kkk</text></svg>`;
@@ -1079,7 +1251,7 @@
             watermarkDiv.style.backgroundRepeat = 'repeat';
         });
 
-        // 复制微信号并显示提示框
+        // 顶栏复制微信号并显示提示框
         function copyWechat() {
             const wechatId = "zy8888kkk";
             const textArea = document.createElement("textarea");
@@ -1102,7 +1274,8 @@
             const container = document.getElementById('toast-container');
             
             const toast = document.createElement('div');
-            toast.className = 'bg-gray-900 text-white px-6 py-3 rounded-full shadow-lg flex items-center mb-3 toast-enter text-sm md:text-base font-medium';
+            // 注意：因为加入了弹窗，弹窗的 z-index 是 10000，我在上方把 toast-container 的 z-index 改为了 11000 以免被遮挡
+            toast.className = 'bg-gray-900/95 text-white px-6 py-3 rounded-full shadow-lg flex items-center mb-3 toast-enter text-sm md:text-base font-medium';
             toast.innerHTML = `<svg class="w-5 h-5 mr-2 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> ${message}`;
             
             container.appendChild(toast);
@@ -1123,6 +1296,3 @@
     </script>
 </body>
 </html>
-
-
-```
